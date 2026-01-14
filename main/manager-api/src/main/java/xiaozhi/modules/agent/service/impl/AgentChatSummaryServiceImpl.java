@@ -48,10 +48,10 @@ public class AgentChatSummaryServiceImpl implements AgentChatSummaryService {
     // 总结规则常量
     private static final int MAX_SUMMARY_LENGTH = 1800; // 最大总结长度
     private static final Pattern JSON_PATTERN = Pattern.compile("\\{.*?\\}", Pattern.DOTALL);
-    private static final Pattern DEVICE_CONTROL_PATTERN = Pattern.compile("设备控制|设备操作|控制设备|设备状态",
+    private static final Pattern DEVICE_CONTROL_PATTERN = Pattern.compile("Equipment control|Equipment operation|Control equipment|Equipment status",
             Pattern.CASE_INSENSITIVE);
-    private static final Pattern WEATHER_PATTERN = Pattern.compile("天气|温度|湿度|降雨|气象", Pattern.CASE_INSENSITIVE);
-    private static final Pattern DATE_PATTERN = Pattern.compile("日期|时间|星期|月份|年份", Pattern.CASE_INSENSITIVE);
+    private static final Pattern WEATHER_PATTERN = Pattern.compile("Weather|Temperature|Humidity|Rainfall|Meteorology", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DATE_PATTERN = Pattern.compile("Date|Time|Weekday|Month|Year", Pattern.CASE_INSENSITIVE);
 
     private AgentChatSummaryDTO generateChatSummary(String sessionId) {
         try {
@@ -60,19 +60,19 @@ public class AgentChatSummaryServiceImpl implements AgentChatSummaryService {
             // 1. 根据sessionId获取聊天记录
             List<AgentChatHistoryDTO> chatHistory = getChatHistoryBySessionId(sessionId);
             if (chatHistory == null || chatHistory.isEmpty()) {
-                return new AgentChatSummaryDTO(sessionId, "未找到该会话的聊天记录");
+                return new AgentChatSummaryDTO(sessionId, "No chat history found for this session");
             }
 
             // 2. 获取智能体信息
             String agentId = getAgentIdFromSession(sessionId, chatHistory);
             if (StringUtils.isBlank(agentId)) {
-                return new AgentChatSummaryDTO(sessionId, "无法获取智能体信息");
+                return new AgentChatSummaryDTO(sessionId, "Unable to obtain agent information");
             }
 
             // 3. 提取关键对话内容
             List<String> meaningfulMessages = extractMeaningfulMessages(chatHistory);
             if (meaningfulMessages.isEmpty()) {
-                return new AgentChatSummaryDTO(sessionId, "没有有效的对话内容可总结");
+                return new AgentChatSummaryDTO(sessionId, "There is no effective dialogue content to summarize.");
             }
 
             // 4. 生成总结（generateSummaryFromMessages方法已包含长度限制逻辑）
@@ -83,7 +83,7 @@ public class AgentChatSummaryServiceImpl implements AgentChatSummaryService {
 
         } catch (Exception e) {
             System.err.println("生成会话 " + sessionId + " 的聊天记录总结时发生错误: " + e.getMessage());
-            return new AgentChatSummaryDTO(sessionId, "生成总结时发生错误: " + e.getMessage());
+            return new AgentChatSummaryDTO(sessionId, "An error occurred while generating the summary: " + e.getMessage());
         }
     }
 
@@ -249,13 +249,13 @@ public class AgentChatSummaryServiceImpl implements AgentChatSummaryService {
      */
     private String generateSummaryFromMessages(List<String> messages, String agentId) {
         if (messages.isEmpty()) {
-            return "本次对话内容较少，没有需要总结的重要信息。";
+            return "The conversation was brief and contained no significant information that needs to be summarized.";
         }
 
         // 构建完整的对话内容
         StringBuilder conversation = new StringBuilder();
         for (int i = 0; i < messages.size(); i++) {
-            conversation.append("消息").append(i + 1).append(": ").append(messages.get(i)).append("\n");
+            conversation.append("Information").append(i + 1).append(": ").append(messages.get(i)).append("\n");
         }
 
         try {
@@ -309,14 +309,14 @@ public class AgentChatSummaryServiceImpl implements AgentChatSummaryService {
             String modelId = getMemorySummaryModelId(agentId);
 
             if (StringUtils.isBlank(modelId)) {
-                System.out.println("未找到记忆总结的LLM模型配置，使用默认LLM服务");
+                System.out.println("No LLM model configuration for memory summarization found; default LLM service will be used.");
                 return llmService.generateSummaryWithHistory(conversation, historyMemory, null, null);
             }
 
             // 使用指定的模型ID调用LLM服务（支持历史记忆合并）
             String summary = llmService.generateSummaryWithHistory(conversation, historyMemory, null, modelId);
 
-            if (StringUtils.isNotBlank(summary) && !summary.equals("服务暂不可用") && !summary.equals("总结生成失败")) {
+            if (StringUtils.isNotBlank(summary) && !summary.equals("Service is temporarily unavailable") && !summary.equals("Summary generation failed")) {
                 return summary;
             }
 

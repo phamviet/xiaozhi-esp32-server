@@ -14,7 +14,7 @@ class DeviceNotFoundException(Exception):
 class DeviceBindException(Exception):
     def __init__(self, bind_code):
         self.bind_code = bind_code
-        super().__init__(f"设备绑定异常，绑定码: {bind_code}")
+        super().__init__(f"Device binding error, binding code: {bind_code}")
 
 
 class ManageApiClient:
@@ -35,13 +35,13 @@ class ManageApiClient:
         cls.config = config.get("manager-api")
 
         if not cls.config:
-            raise Exception("manager-api配置错误")
+            raise Exception("manager-api config is missing.")
 
         if not cls.config.get("url") or not cls.config.get("secret"):
-            raise Exception("manager-api的url或secret配置错误")
+            raise Exception("The manager-api URL or secret configuration is missing.")
 
         if "你" in cls.config.get("secret"):
-            raise Exception("请先配置manager-api的secret")
+            raise Exception("Please configure the manager-api secret first.")
 
         cls._secret = cls.config.get("secret")
         cls.max_retries = cls.config.get("max_retries", 6)  # 最大重试次数
@@ -77,7 +77,7 @@ class ManageApiClient:
             return cls._async_clients[loop_id]
         except RuntimeError:
             # 如果没有运行中的事件循环，创建一个临时的
-            raise Exception("必须在异步上下文中调用")
+            raise Exception("Must be called in an asynchronous context")
 
     @classmethod
     async def _async_request(cls, method: str, endpoint: str, **kwargs) -> Dict:
@@ -98,7 +98,7 @@ class ManageApiClient:
             elif result.get("code") == 10042:
                 raise DeviceBindException(result.get("msg"))
             elif result.get("code") != 0:
-                raise Exception(f"API返回错误: {result.get('msg', '未知错误')}")
+                raise Exception(f"API error: {result.get('msg', 'Unknown error')}")
 
             # 返回成功数据
             return result.get("data") if result.get("code") == 0 else None

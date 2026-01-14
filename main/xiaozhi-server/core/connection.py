@@ -818,7 +818,7 @@ class ConnectionHandler:
             self.dialogue.put(
                 Message(
                     role="user",
-                    content="[系统提示] 已达到最大工具调用次数限制，请你基于目前已经获取的所有信息，直接给出最终答案。不要再尝试调用任何工具。",
+                    content="[System Prompt] You have reached the maximum number of tool calls. Please provide your final answer based on all the information you have obtained. Do not attempt to call any more tools.",
                 )
             )
 

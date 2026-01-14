@@ -154,12 +154,12 @@ class MemoryProvider(MemoryProviderBase):
             elif msg.role == "assistant":
                 msgStr += f"Assistant: {msg.content}\n"
         if self.short_memory and len(self.short_memory) > 0:
-            msgStr += "历史记忆：\n"
+            msgStr += "Historical memory：\n"
             msgStr += self.short_memory
 
         # 当前时间
         time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        msgStr += f"当前时间：{time_str}"
+        msgStr += f"Current time：{time_str}"
 
         if self.save_to_file:
             result = self.llm.response_no_stream(
