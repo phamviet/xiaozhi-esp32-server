@@ -11,9 +11,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 配置pip使用国内镜像源（阿里云）并设置超时和重试
-RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
-    pip config set global.trusted-host mirrors.aliyun.com && \
-    pip config set global.timeout 120 && \
+RUN pip config set global.timeout 120 && \
     pip config set install.retries 5
 
 # 设置环境变量以确保正确的字符编码

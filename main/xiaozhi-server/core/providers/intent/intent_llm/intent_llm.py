@@ -33,18 +33,18 @@ class IntentProvider(IntentProviderBase):
         """
 
         # 构建函数说明部分
-        functions_desc = "可用的函数列表：\n"
+        functions_desc = "List of available functions：\n"
         for func in functions_list:
             func_info = func.get("function", {})
             name = func_info.get("name", "")
             desc = func_info.get("description", "")
             params = func_info.get("parameters", {})
 
-            functions_desc += f"\n函数名: {name}\n"
-            functions_desc += f"描述: {desc}\n"
+            functions_desc += f"\nFunction name: {name}\n"
+            functions_desc += f"Description: {desc}\n"
 
             if params:
-                functions_desc += "参数:\n"
+                functions_desc += "Parameter:\n"
                 for param_name, param_info in params.get("properties", {}).items():
                     param_desc = param_info.get("description", "")
                     param_type = param_info.get("type", "")
@@ -53,71 +53,71 @@ class IntentProvider(IntentProviderBase):
             functions_desc += "---\n"
 
         prompt = (
-            "【严格格式要求】你必须只能返回JSON格式，绝对不能返回任何自然语言！\n\n"
-            "你是一个意图识别助手。请分析用户的最后一句话，判断用户意图并调用相应的函数。\n\n"
-            "【重要规则】以下类型的查询请直接返回result_for_context，无需调用函数：\n"
-            "- 询问当前时间（如：现在几点、当前时间、查询时间等）\n"
-            "- 询问今天日期（如：今天几号、今天星期几、今天是什么日期等）\n"
-            "- 询问今天农历（如：今天农历几号、今天什么节气等）\n"
-            "- 询问所在城市（如：我现在在哪里、你知道我在哪个城市吗等）"
-            "系统会根据上下文信息直接构建回答。\n\n"
-            "- 如果用户使用疑问词（如'怎么'、'为什么'、'如何'）询问退出相关的问题（例如'怎么退出了？'），注意这不是让你退出，请返回 {'function_call': {'name': 'continue_chat'}\n"
-            "- 仅当用户明确使用'退出系统'、'结束对话'、'我不想和你说话了'等指令时，才触发 handle_exit_intent\n\n"
+            "[Strict Formatting Requirements] You must return only JSON format and absolutely cannot return any natural language!\n\n"
+            "You are an intent recognition assistant. Please analyze the user's last sentence, determine the user's intent, and call the corresponding function.\n\n"
+            "【Important Rule】For the following types of queries, please return result_for_context directly without calling a function:\n"
+            "- Query the current time (e.g., what time is it now, current time, query time, etc.)\n"
+            "- Ask for today's date (e.g., what's today's date, what day of the week it is, what is the date today, etc.)\n"
+            "- Ask about today's lunar calendar date (e.g., what is today's lunar date, what solar term is today, etc.)\n"
+            "- Ask about the city you are in (e.g., Where am I now? Do you know which city I am in?)\n"
+            "The system will construct an answer directly based on the context information.\n\n"
+            "- If a user asks a question related to exiting (e.g., 'How did I exit?') using interrogative words (such as 'how,' 'why,' 'how to'), note that this does not mean you are exiting. Please return {'function_call': {'name': 'continue_chat'}.\n"
+            "- The handle_exit_intent is only triggered when the user explicitly uses commands such as 'exit system', 'end conversation', or 'I don't want to talk to you anymore'.\n\n"
             f"{functions_desc}\n"
-            "处理步骤:\n"
-            "1. 分析用户输入，确定用户意图\n"
-            "2. 检查是否为上述基础信息查询（时间、日期等），如是则返回result_for_context\n"
-            "3. 从可用函数列表中选择最匹配的函数\n"
-            "4. 如果找到匹配的函数，生成对应的function_call 格式\n"
-            '5. 如果没有找到匹配的函数，返回{"function_call": {"name": "continue_chat"}}\n\n'
-            "返回格式要求：\n"
-            "1. 必须返回纯JSON格式，不要包含任何其他文字\n"
-            "2. 必须包含function_call字段\n"
-            "3. function_call必须包含name字段\n"
-            "4. 如果函数需要参数，必须包含arguments字段\n\n"
-            "示例：\n"
+            "Processing steps:\n"
+            "1. Analyze user input to determine user intent\n"
+            "2. Check if the query is for the basic information mentioned above (time, date, etc.). If so, return result_for_context.\n"
+            "3. Select the best matching function from the list of available functions.\n"
+            "4. If a matching function is found, generate the corresponding function_call format.\n"
+            '5. If no matching function is found, return {"function_call": {"name": "continue_chat"}}\n\n'
+            "Return format requirements：\n"
+            "1. The returned data must be in plain JSON format and must not contain any other text.\n"
+            "2. The function_call field must be included.\n"
+            "3. The function_call must include a name field.\n"
+            "4. If a function requires arguments, it must include the arguments field.\n\n"
+            "Example：\n"
             "```\n"
-            "用户: 现在几点了？\n"
-            '返回: {"function_call": {"name": "result_for_context"}}\n'
-            "```\n"
-            "```\n"
-            "用户: 当前电池电量是多少？\n"
-            '返回: {"function_call": {"name": "get_battery_level", "arguments": {"response_success": "当前电池电量为{value}%", "response_failure": "无法获取Battery的当前电量百分比"}}}\n'
+            "User: What time is it now?\n"
+            'Return: {"function_call": {"name": "result_for_context"}}\n'
             "```\n"
             "```\n"
-            "用户: 当前屏幕亮度是多少？\n"
-            '返回: {"function_call": {"name": "self_screen_get_brightness"}}\n'
+            "User: What is the current battery level?\n"
+            'Return: {"function_call": {"name": "get_battery_level", "arguments": {"response_success": "Current battery level is {value}%", "response_failure": "Unable to obtain the current battery percentage"}}}\n'
             "```\n"
             "```\n"
-            "用户: 设置屏幕亮度为50%\n"
-            '返回: {"function_call": {"name": "self_screen_set_brightness", "arguments": {"brightness": 50}}}\n'
+            "User: What is the current screen brightness?\n"
+            'Return: {"function_call": {"name": "self_screen_get_brightness"}}\n'
             "```\n"
             "```\n"
-            "用户: 我想结束对话\n"
-            '返回: {"function_call": {"name": "handle_exit_intent", "arguments": {"say_goodbye": "goodbye"}}}\n'
+            "User: Set the screen brightness to 50%\n"
+            'Return: {"function_call": {"name": "self_screen_set_brightness", "arguments": {"brightness": 50}}}\n'
             "```\n"
             "```\n"
-            "用户: 你好啊\n"
-            '返回: {"function_call": {"name": "continue_chat"}}\n'
+            "User: I want to end this conversation.\n"
+            'Return: {"function_call": {"name": "handle_exit_intent", "arguments": {"say_goodbye": "goodbye"}}}\n'
+            "```\n"
+            "```\n"
+            "User: Hello\n"
+            'Return: {"function_call": {"name": "continue_chat"}}\n'
             "```\n\n"
-            "注意：\n"
-            "1. 只返回JSON格式，不要包含任何其他文字\n"
-            '2. 优先检查用户查询是否为基础信息（时间、日期等），如是则返回{"function_call": {"name": "result_for_context"}}，不需要arguments参数\n'
-            '3. 如果没有找到匹配的函数，返回{"function_call": {"name": "continue_chat"}}\n'
-            "4. 确保返回的JSON格式正确，包含所有必要的字段\n"
-            "5. result_for_context不需要任何参数，系统会自动从上下文获取信息\n"
-            "特殊说明：\n"
-            "- 当用户单次输入包含多个指令时（如'打开灯并且调高音量'）\n"
-            "- 请返回多个function_call组成的JSON数组\n"
-            "- 示例：{'function_calls': [{name:'light_on'}, {name:'volume_up'}]}\n\n"
-            "【最终警告】绝对禁止输出任何自然语言、表情符号或解释文字！只能输出有效JSON格式！违反此规则将导致系统错误！"
+            "Notice：\n"
+            "1. Return only JSON format, do not include any other text.\n"
+            '2. First, check if the user query is for basic information (time, date, etc.); if so, return the information {"function_call": {"name": "result_for_context"}}，The arguments parameter is not needed.\n'
+            '3. If no matching function is found, return {"function_call": {"name": "continue_chat"}}\n'
+            "4. Ensure the returned JSON is in the correct format and contains all necessary fields.\n"
+            "5. The result_for_context function requires no parameters; the system will automatically retrieve information from the context.\n"
+            "Special Notes：\n"
+            "- When a user inputs multiple commands in a single instance (such as 'turn on the light and turn up the volume')\n"
+            "- Please return a JSON array consisting of multiple function calls.\n"
+            "- Example：{'function_calls': [{name:'light_on'}, {name:'volume_up'}]}\n\n"
+            "[Final Warning] Outputting any natural language, emojis, or explanatory text is strictly prohibited! Only valid JSON format is allowed! Violating this rule will result in a system error!"
         )
         return prompt
 
     def replyResult(self, text: str, original_text: str):
         llm_result = self.llm.response_no_stream(
             system_prompt=text,
-            user_prompt="请根据以上内容，像人类一样说话的口吻回复用户，要求简洁，请直接返回结果。用户现在说："
+            user_prompt="Based on the above information, please reply to the user in a human-like tone, keeping it concise and returning the result directly. The user now says："
             + original_text,
         )
         return llm_result
@@ -133,7 +133,7 @@ class IntentProvider(IntentProviderBase):
 
         # 打印使用的模型信息
         model_info = getattr(self.llm, "model_name", str(self.llm.__class__.__name__))
-        logger.bind(tag=TAG).debug(f"使用意图识别模型: {model_info}")
+        logger.bind(tag=TAG).debug(f"Using an intent recognition model: {model_info}")
 
         # 计算缓存键
         cache_key = hashlib.md5((conn.device_id + text).encode()).hexdigest()
@@ -143,7 +143,7 @@ class IntentProvider(IntentProviderBase):
         if cached_intent is not None:
             cache_time = time.time() - total_start_time
             logger.bind(tag=TAG).debug(
-                f"使用缓存的意图: {cache_key} -> {cached_intent}, 耗时: {cache_time:.4f}秒"
+                f"Using cached intent: {cache_key} -> {cached_intent}, Duration: {cache_time:.4f}s"
             )
             return cached_intent
 
@@ -168,7 +168,7 @@ class IntentProvider(IntentProviderBase):
         else:
             devices = []
         if len(devices) > 0:
-            hass_prompt = "\n下面是我家智能设备列表（位置，设备名，entity_id），可以通过homeassistant控制\n"
+            hass_prompt = "\nBelow is a list of my smart devices (location, device name, entity_id), which can be controlled via Home Assistant\n"
             for device in devices:
                 hass_prompt += device + "\n"
             prompt_music += hass_prompt
@@ -188,7 +188,7 @@ class IntentProvider(IntentProviderBase):
 
         # 记录预处理完成时间
         preprocess_time = time.time() - total_start_time
-        logger.bind(tag=TAG).debug(f"意图识别预处理耗时: {preprocess_time:.4f}秒")
+        logger.bind(tag=TAG).debug(f"Intent recognition preprocessing time: {preprocess_time:.4f}s")
 
         # 使用LLM进行意图识别
         llm_start_time = time.time()
@@ -238,7 +238,7 @@ class IntentProvider(IntentProviderBase):
                 if function_name == "result_for_context":
                     # 处理基础信息查询，直接从context构建结果
                     logger.bind(tag=TAG).info(
-                        "检测到result_for_context意图，将使用上下文信息直接回答"
+                        "If the `result_for_context` intent is detected, the response will be given directly using the context information"
                     )
 
                 elif function_name == "continue_chat":
@@ -253,12 +253,12 @@ class IntentProvider(IntentProviderBase):
 
                 else:
                     # 处理函数调用
-                    logger.bind(tag=TAG).info(f"检测到函数调用意图: {function_name}")
+                    logger.bind(tag=TAG).info(f"Function call intent detected: {function_name}")
 
             # 统一缓存处理和返回
             self.cache_manager.set(self.CacheType.INTENT, cache_key, intent)
             postprocess_time = time.time() - postprocess_start_time
-            logger.bind(tag=TAG).debug(f"意图后处理耗时: {postprocess_time:.4f}秒")
+            logger.bind(tag=TAG).debug(f"意图后处理耗时: {postprocess_time:.4f}s")
             return intent
         except json.JSONDecodeError:
             # 后处理时间

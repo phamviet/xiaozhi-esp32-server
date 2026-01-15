@@ -18,13 +18,13 @@ play_music_function_desc = {
     "type": "function",
     "function": {
         "name": "play_music",
-        "description": "唱歌、听歌、播放音乐的方法。",
+        "description": "Methods for singing, listening to songs, and playing music.",
         "parameters": {
             "type": "object",
             "properties": {
                 "song_name": {
                     "type": "string",
-                    "description": "歌曲名称，如果用户没有指定具体歌名则为'random', 明确指定的时返回音乐的名字 示例: ```用户:播放两只老虎\n参数：两只老虎``` ```用户:播放音乐 \n参数：random ```",
+                    "description": "Song title. If the user doesn't specify a song title, it returns 'random'. If explicitly specified, it returns the song's name. Example: ```User: Play Two Tigers\nParameter: Two Tigers``` ```User: Play Music\nParameter: random```",
                 }
             },
             "required": ["song_name"],
@@ -37,14 +37,14 @@ play_music_function_desc = {
 def play_music(conn, song_name: str):
     try:
         music_intent = (
-            f"播放音乐 {song_name}" if song_name != "random" else "随机播放音乐"
+            f"Play music {song_name}" if song_name != "random" else "Random music playback"
         )
 
         # 检查事件循环状态
         if not conn.loop.is_running():
             conn.logger.bind(tag=TAG).error("事件循环未运行，无法提交任务")
             return ActionResponse(
-                action=Action.RESPONSE, result="系统繁忙", response="请稍后再试"
+                action=Action.RESPONSE, result="System busy", response="Please try again later"
             )
 
         # 提交异步任务
@@ -63,18 +63,18 @@ def play_music(conn, song_name: str):
         task.add_done_callback(handle_done)
 
         return ActionResponse(
-            action=Action.NONE, result="指令已接收", response="正在为您播放音乐"
+            action=Action.NONE, result="Instruction received", response="Music is playing"
         )
     except Exception as e:
         conn.logger.bind(tag=TAG).error(f"处理音乐意图错误: {e}")
         return ActionResponse(
-            action=Action.RESPONSE, result=str(e), response="播放音乐时出错了"
+            action=Action.RESPONSE, result=str(e), response="An error occurred while playing music"
         )
 
 
 def _extract_song_name(text):
     """从用户输入中提取歌名"""
-    for keyword in ["播放音乐"]:
+    for keyword in ["Play music"]:
         if keyword in text:
             parts = text.split(keyword)
             if len(parts) > 1:
@@ -176,13 +176,13 @@ def _get_random_play_prompt(song_name):
     # 移除文件扩展名
     clean_name = os.path.splitext(song_name)[0]
     prompts = [
-        f"正在为您播放，《{clean_name}》",
-        f"请欣赏歌曲，《{clean_name}》",
-        f"即将为您播放，《{clean_name}》",
-        f"现在为您带来，《{clean_name}》",
-        f"让我们一起聆听，《{clean_name}》",
-        f"接下来请欣赏，《{clean_name}》",
-        f"此刻为您献上，《{clean_name}》",
+        f"Now playing for you，《{clean_name}》",
+        f"Please enjoy the song，《{clean_name}》",
+        f"Coming soon，《{clean_name}》",
+        f"Now bringing you，《{clean_name}》",
+        f"Let's listen together，《{clean_name}》",
+        f"Next, please enjoy，《{clean_name}》",
+        f"Now, we present to you，《{clean_name}》",
     ]
     # 直接使用random.choice，不设置seed
     return random.choice(prompts)

@@ -90,7 +90,7 @@ class UnifiedToolHandler:
                 and "你的" not in mcp_endpoint_url
                 and mcp_endpoint_url != "null"
             ):
-                self.logger.info(f"正在初始化MCP接入点: {mcp_endpoint_url}")
+                self.logger.info(f"Initializing MCP access point: {mcp_endpoint_url}")
                 mcp_endpoint_client = await connect_mcp_endpoint(
                     mcp_endpoint_url, self.conn
                 )
@@ -98,9 +98,9 @@ class UnifiedToolHandler:
                 if mcp_endpoint_client:
                     # 将MCP接入点客户端保存到连接对象中
                     self.conn.mcp_endpoint_client = mcp_endpoint_client
-                    self.logger.info("MCP接入点初始化成功")
+                    # self.logger.info("MCP接入点初始化成功")
                 else:
-                    self.logger.warning("MCP接入点初始化失败")
+                    self.logger.warning("MCP initialization failed")
 
         except Exception as e:
             self.logger.error(f"初始化MCP接入点失败: {e}")
@@ -123,13 +123,13 @@ class UnifiedToolHandler:
     def current_support_functions(self) -> List[str]:
         """获取当前支持的函数名称列表"""
         func_names = self.tool_manager.get_supported_tool_names()
-        self.logger.info(f"当前支持的函数列表: {func_names}")
+        self.logger.info(f"List of currently supported functions: {func_names}")
         return func_names
 
     def upload_functions_desc(self):
         """刷新函数描述列表"""
         self.tool_manager.refresh_tools()
-        self.logger.info("函数描述列表已刷新")
+        self.logger.info("The function description list has been refreshed")
 
     def has_tool(self, tool_name: str) -> bool:
         """检查是否有指定工具"""
@@ -212,7 +212,7 @@ class UnifiedToolHandler:
         """注册IoT设备工具"""
         self.device_iot_executor.register_iot_tools(descriptors)
         self.tool_manager.refresh_tools()
-        self.logger.info(f"注册了{len(descriptors)}个IoT设备的工具")
+        self.logger.info(f"Registered {len(descriptors)} Tools for an IoT device")
 
     def get_tool_statistics(self) -> Dict[str, int]:
         """获取工具统计信息"""
@@ -230,6 +230,6 @@ class UnifiedToolHandler:
             ):
                 await self.conn.mcp_endpoint_client.close()
 
-            self.logger.info("工具处理器清理完成")
+            self.logger.info("Tool processor cleanup complete")
         except Exception as e:
-            self.logger.error(f"工具处理器清理失败: {e}")
+            self.logger.error(f"Tool processor cleanup failed: {e}")

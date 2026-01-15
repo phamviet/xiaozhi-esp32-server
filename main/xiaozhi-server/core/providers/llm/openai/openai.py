@@ -132,9 +132,9 @@ class LLMProvider(LLMProviderBase):
                 elif isinstance(getattr(chunk, "usage", None), CompletionUsage):
                     usage_info = getattr(chunk, "usage", None)
                     logger.bind(tag=TAG).info(
-                        f"Token 消耗：输入 {getattr(usage_info, 'prompt_tokens', '未知')}，"
-                        f"输出 {getattr(usage_info, 'completion_tokens', '未知')}，"
-                        f"共计 {getattr(usage_info, 'total_tokens', '未知')}"
+                        f"Token consumption: Input {getattr(usage_info, 'prompt_tokens', 'unknown')}，"
+                        f"Output {getattr(usage_info, 'completion_tokens', 'unknown')}，"
+                        f"Total {getattr(usage_info, 'total_tokens', 'unknown')}"
                     )
 
         except Exception as e:

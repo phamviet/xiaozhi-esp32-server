@@ -200,7 +200,7 @@ class TTSProvider(TTSProviderBase):
                     )
                     return []
 
-                logger.info(f"TTS请求成功: {text}, 耗时: {time.time() - start_time}秒")
+                logger.info(f"TTS request successful: {text}, Duration: {time.time() - start_time}s")
 
                 # 使用opus编码器处理PCM数据
                 opus_datas = []

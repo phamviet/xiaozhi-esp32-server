@@ -7,15 +7,15 @@ logger = setup_logging()
 
 
 class ToolType(Enum):
-    NONE = (1, "调用完工具后，不做其他操作")
-    WAIT = (2, "调用工具，等待函数返回")
-    CHANGE_SYS_PROMPT = (3, "修改系统提示词，切换角色性格或职责")
+    NONE = (1, "After using the tool, do not perform any other operations")
+    WAIT = (2, "Call the tool and wait for the function to return")
+    CHANGE_SYS_PROMPT = (3, "Modify system prompts and switch character personality or role")
     SYSTEM_CTL = (
         4,
-        "系统控制，影响正常的对话流程，如退出、播放音乐等，需要传递conn参数",
+        "System controls that disrupt normal conversation flow, such as exiting or playing music, require passing the `conn` parameter",
     )
-    IOT_CTL = (5, "IOT设备控制，需要传递conn参数")
-    MCP_CLIENT = (6, "MCP客户端")
+    IOT_CTL = (5, "For IoT device control, the conn parameter needs to be passed")
+    MCP_CLIENT = (6, "MCP client")
 
     def __init__(self, code, message):
         self.code = code
@@ -23,11 +23,11 @@ class ToolType(Enum):
 
 
 class Action(Enum):
-    ERROR = (-1, "错误")
-    NOTFOUND = (0, "没有找到函数")
-    NONE = (1, "啥也不干")
-    RESPONSE = (2, "直接回复")
-    REQLLM = (3, "调用函数后再请求llm生成回复")
+    ERROR = (-1, "Error")
+    NOTFOUND = (0, "Not found")
+    NONE = (1, "None")
+    RESPONSE = (2, "Response")
+    REQLLM = (3, "Call the function and then request the LLM to generate a response")
 
     def __init__(self, code, message):
         self.code = code

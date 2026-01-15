@@ -213,7 +213,7 @@ class ConnectionHandler:
                 async for message in self.websocket:
                     await self._route_message(message)
             except websockets.exceptions.ConnectionClosed:
-                self.logger.bind(tag=TAG).info("客户端断开连接")
+                self.logger.bind(tag=TAG).info("Connection closed")
 
         except AuthenticationError as e:
             self.logger.bind(tag=TAG).error(f"Authentication failed: {str(e)}")
@@ -385,7 +385,7 @@ class ConnectionHandler:
         """处理服务器重启请求"""
         try:
 
-            self.logger.bind(tag=TAG).info("收到服务器重启指令，准备执行...")
+            self.logger.bind(tag=TAG).info("Received server restart command, ready to execute.")
 
             # 发送确认响应
             await self.websocket.send(
@@ -393,7 +393,7 @@ class ConnectionHandler:
                     {
                         "type": "server",
                         "status": "success",
-                        "message": "服务器重启中...",
+                        "message": "Server restarting...",
                         "content": {"action": "restart"},
                     }
                 )
@@ -451,9 +451,6 @@ class ConnectionHandler:
                 # 使用快速提示词进行初始化
                 prompt = self.prompt_manager.get_quick_prompt(user_prompt)
                 self.change_system_prompt(prompt)
-                self.logger.bind(tag=TAG).info(
-                    f"快速初始化组件: prompt成功 {prompt[:50]}..."
-                )
 
             """初始化本地组件"""
             if self.vad is None:
@@ -502,7 +499,7 @@ class ConnectionHandler:
                 target=self._report_worker, daemon=True
             )
             self.report_thread.start()
-            self.logger.bind(tag=TAG).info("TTS上报线程已启动")
+            self.logger.bind(tag=TAG).info("TTS reporting thread has been started.")
 
     def _initialize_tts(self):
         """初始化TTS"""
@@ -544,7 +541,7 @@ class ConnectionHandler:
                 else:
                     self.logger.bind(tag=TAG).warning("声纹识别功能启用但配置不完整")
             else:
-                self.logger.bind(tag=TAG).info("声纹识别功能未启用")
+                self.logger.bind(tag=TAG).info("Voiceprint recognition function is not enabled.")
         except Exception as e:
             self.logger.bind(tag=TAG).warning(f"声纹识别初始化失败: {str(e)}")
 
@@ -573,7 +570,7 @@ class ConnectionHandler:
             )
             private_config["delete_audio"] = bool(self.config.get("delete_audio", True))
             self.logger.bind(tag=TAG).info(
-                f"{time.time() - begin_time} 秒，异步获取差异化配置成功: {json.dumps(filter_sensitive_info(private_config), ensure_ascii=False)}"
+                f"{time.time() - begin_time} second，Pulled config: {json.dumps(filter_sensitive_info(private_config), ensure_ascii=False)}"
             )
             self.need_bind = False
             self.bind_completed_event.set()
@@ -726,13 +723,13 @@ class ConnectionHandler:
                     memory_llm_type, memory_llm_config
                 )
                 self.logger.bind(tag=TAG).info(
-                    f"为记忆总结创建了专用LLM: {memory_llm_name}, 类型: {memory_llm_type}"
+                    f"Memory summarization: {memory_llm_name}, type: {memory_llm_type}"
                 )
                 self.memory.set_llm(memory_llm)
             else:
                 # 否则使用主LLM
                 self.memory.set_llm(self.llm)
-                self.logger.bind(tag=TAG).info("使用主LLM作为意图识别模型")
+                self.logger.bind(tag=TAG).info("Using the default LLM as the intent recognition model")
 
     def _initialize_intent(self):
         if self.intent is None:
@@ -768,7 +765,7 @@ class ConnectionHandler:
                     intent_llm_type, intent_llm_config
                 )
                 self.logger.bind(tag=TAG).info(
-                    f"为意图识别创建了专用LLM: {intent_llm_name}, 类型: {intent_llm_type}"
+                    f"Intent recognition: {intent_llm_name}, type: {intent_llm_type}"
                 )
                 self.intent.set_llm(intent_llm)
             else:
@@ -790,7 +787,7 @@ class ConnectionHandler:
 
     def chat(self, query, depth=0):
         if query is not None:
-            self.logger.bind(tag=TAG).info(f"大模型收到用户消息: {query}")
+            self.logger.bind(tag=TAG).info(f"User: {query}")
 
         # 为最顶层时新建会话ID和发送FIRST请求
         if depth == 0:
@@ -1074,7 +1071,7 @@ class ConnectionHandler:
             except Exception as e:
                 self.logger.bind(tag=TAG).error(f"聊天记录上报工作线程异常: {e}")
 
-        self.logger.bind(tag=TAG).info("聊天记录上报线程已退出")
+        self.logger.bind(tag=TAG).info("The chat history reporting thread exited")
 
     def _process_report(self, type, text, audio_data, report_time):
         """处理上报任务"""
@@ -1171,7 +1168,7 @@ class ConnectionHandler:
                         f"关闭线程池时出错: {executor_error}"
                     )
                 self.executor = None
-            self.logger.bind(tag=TAG).info("连接资源已释放")
+            self.logger.bind(tag=TAG).info("Connection resources have been released")
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"关闭连接时出错: {e}")
         finally:
@@ -1239,7 +1236,7 @@ class ConnectionHandler:
                     current_time = time.time() * 1000
                     if current_time - last_activity_time > self.timeout_seconds * 1000:
                         if not self.stop_event.is_set():
-                            self.logger.bind(tag=TAG).info("连接超时，准备关闭")
+                            self.logger.bind(tag=TAG).info("Connection timed out, preparing to close")
                             # 设置停止事件，防止重复处理
                             self.stop_event.set()
                             # 使用 try-except 包装关闭操作，确保不会因为异常而阻塞
@@ -1254,8 +1251,8 @@ class ConnectionHandler:
                 await asyncio.sleep(10)
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"超时检查任务出错: {e}")
-        finally:
-            self.logger.bind(tag=TAG).info("超时检查任务已退出")
+        # finally:
+        #     self.logger.bind(tag=TAG).info("超时检查任务已退出")
 
     def _merge_tool_calls(self, tool_calls_list, tools_call):
         """合并工具调用列表
